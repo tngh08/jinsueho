@@ -7,6 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            text-align: center;
         }
         .container {
             margin: 20px;
@@ -20,12 +21,45 @@
         .game-screen {
             display: none;
         }
+        .cat-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .cat {
+            position: relative;
+            left: -50px;
+        }
+        .sword {
+            position: relative;
+            left: 50px;
+        }
+        .glow {
+            animation: glowEffect 0.5s ease-in-out;
+        }
+        @keyframes glowEffect {
+            0% { filter: brightness(1); }
+            50% { filter: brightness(2); }
+            100% { filter: brightness(1); }
+        }
+        .message {
+            font-size: 24px;
+            font-weight: bold;
+            color: red;
+            display: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="upgrade-screen">
             <h2>검을 강화하세요!</h2>
+            <div class="cat-container">
+                <img src="cat.png" alt="고양이" class="cat">
+                <img src="sword.png" alt="검" class="sword" id="sword">
+            </div>
+            <p class="message" id="upgrade-message"></p>
             <p>현재 대미지: <span id="damage">2</span></p>
             <p>강화 성공 확률: <span id="success-rate">100%</span></p>
             <p id="failure-rate-container" style="display: none;">파괴 확률: <span id="failure-rate">0%</span></p>
@@ -38,6 +72,7 @@
 
         <div id="battle-screen" class="game-screen">
             <h2>악당과 전투! (스테이지 <span id="stage">1</span>)</h2>
+            <img src="enemy.png" alt="악당" id="enemy">
             <p>악당 체력: <span id="enemy-health">1</span></p>
             <p>현재 대미지: <span id="current-damage">2</span></p>
             <button class="button" onclick="attackEnemy()">공격</button>
@@ -62,24 +97,15 @@
             }
             churu -= neededChuru;
             document.getElementById('churu').textContent = churu;
-            
+            document.getElementById('sword').classList.add('glow');
+
             let rand = Math.random() * 100;
             if (rand <= successRate) {
                 weaponDamage *= 2;
                 successRate = Math.max(5, successRate - 5);
                 neededChuru *= 2;
-                if (successRate <= 50) {
-                    document.getElementById('failure-rate-container').style.display = 'block';
-                    if (successRate > 40) {
-                        failureRate = 3;
-                    } else if (successRate > 30) {
-                        failureRate = 4;
-                    } else if (successRate > 20) {
-                        failureRate = 5;
-                    } else {
-                        failureRate = 7;
-                    }
-                }
+                document.getElementById('upgrade-message').textContent = "성공!";
+                document.getElementById('upgrade-message').style.color = "green";
             } else {
                 let failureRand = Math.random() * 100;
                 if (successRate <= 50 && failureRand <= failureRate) {
@@ -87,16 +113,24 @@
                     successRate = 100;
                     failureRate = 0;
                     neededChuru = 1;
+                    stage = 1;
+                    enemyHealth = Math.pow(stage, 3);
                     document.getElementById('failure-rate-container').style.display = 'none';
                     alert("강화 실패! 초기 상태로 돌아갔습니다.");
                 } else {
-                    alert("강화 실패! 대미지는 그대로 유지됩니다.");
+                    document.getElementById('upgrade-message').textContent = "실패!";
+                    document.getElementById('upgrade-message').style.color = "red";
                 }
             }
             document.getElementById('damage').textContent = weaponDamage;
             document.getElementById('success-rate').textContent = successRate + "%";
             document.getElementById('failure-rate').textContent = failureRate + "%";
             document.getElementById('needed-churu').textContent = neededChuru;
+            document.getElementById('upgrade-message').style.display = "block";
+            setTimeout(() => {
+                document.getElementById('sword').classList.remove('glow');
+                document.getElementById('upgrade-message').style.display = "none";
+            }, 1000);
         }
 
         function startBattle() {
