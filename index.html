@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>고양이의 검 강화 게임</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .game-screen {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="upgrade-screen">
+            <h2>검을 강화하세요!</h2>
+            <p>현재 대미지: <span id="damage">2</span></p>
+            <p>강화 성공 확률: <span id="success-rate">100%</span></p>
+            <p id="failure-rate-container" style="display: none;">파괴 확률: <span id="failure-rate">0%</span></p>
+            <p>보유 츄르: <span id="churu">0</span></p>
+            <button class="button" onclick="upgradeWeapon()">검 강화</button>
+            <br>
+            <button class="button" onclick="startBattle()">전투 시작</button>
+        </div>
+
+        <div id="battle-screen" class="game-screen">
+            <h2>악당과 전투! (스테이지 <span id="stage">1</span>)</h2>
+            <p>악당 체력: <span id="enemy-health">1</span></p>
+            <p>현재 대미지: <span id="current-damage">2</span></p>
+            <button class="button" onclick="attackEnemy()">공격</button>
+            <button class="button" onclick="goToUpgradeScreen()">강화 화면으로</button>
+        </div>
+    </div>
+
+    <script>
+        let weaponDamage = 2;
+        let enemyHealth = 1;
+        let stage = 1;
+        let successRate = 100;
+        let baseDamage = 2;
+        let failureRate = 0;
+        let churu = 0;
+
+        function upgradeWeapon() {
+            let rand = Math.random() * 100;
+            if (rand <= successRate) {
+                weaponDamage *= 2;
+                successRate = Math.max(5, successRate - 5);
+                if (successRate <= 50) {
+                    document.getElementById('failure-rate-container').style.display = 'block';
+                    if (successRate > 40) {
+                        failureRate = 3;
+                    } else if (successRate > 30) {
+                        failureRate = 4;
+                    } else if (successRate > 20) {
+                        failureRate = 5;
+                    } else {
+                        failureRate = 7;
+                    }
+                }
+            } else {
+                let failureRand = Math.random() * 100;
+                if (successRate <= 50 && failureRand <= failureRate) {
+                    weaponDamage = baseDamage;
+                    successRate = 100;
+                    failureRate = 0;
+                    document.getElementById('failure-rate-container').style.display = 'none';
+                    alert("강화 실패! 초기 상태로 돌아갔습니다.");
+                } else {
+                    alert("강화 실패! 대미지는 그대로 유지됩니다.");
+                }
+            }
+            document.getElementById('damage').textContent = weaponDamage;
+            document.getElementById('success-rate').textContent = successRate + "%";
+            document.getElementById('failure-rate').textContent = failureRate + "%";
+        }
+
+        function startBattle() {
+            document.getElementById('upgrade-screen').style.display = 'none';
+            document.getElementById('battle-screen').style.display = 'block';
+            document.getElementById('current-damage').textContent = weaponDamage;
+            document.getElementById('enemy-health').textContent = enemyHealth;
+            document.getElementById('stage').textContent = stage;
+        }
+
+        function attackEnemy() {
+            enemyHealth -= weaponDamage;
+            if (enemyHealth <= 0) {
+                alert('악당을 물리쳤습니다! 다음 스테이지로 이동합니다.');
+                churu += 1 + stage;
+                document.getElementById('churu').textContent = churu;
+                nextStage();
+            } else {
+                document.getElementById('enemy-health').textContent = enemyHealth;
+            }
+        }
+
+        function nextStage() {
+            stage++;
+            enemyHealth = Math.pow(stage, 3);
+            document.getElementById('enemy-health').textContent = enemyHealth;
+            document.getElementById('current-damage').textContent = weaponDamage;
+            document.getElementById('stage').textContent = stage;
+        }
+
+        function goToUpgradeScreen() {
+            document.getElementById('battle-screen').style.display = 'none';
+            document.getElementById('upgrade-screen').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
