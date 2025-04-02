@@ -30,6 +30,7 @@
             <p>강화 성공 확률: <span id="success-rate">100%</span></p>
             <p id="failure-rate-container" style="display: none;">파괴 확률: <span id="failure-rate">0%</span></p>
             <p>보유 츄르: <span id="churu">0</span></p>
+            <p>필요한 츄르: <span id="needed-churu">1</span></p>
             <button class="button" onclick="upgradeWeapon()">검 강화</button>
             <br>
             <button class="button" onclick="startBattle()">전투 시작</button>
@@ -52,12 +53,21 @@
         let baseDamage = 2;
         let failureRate = 0;
         let churu = 0;
+        let neededChuru = 1;
 
         function upgradeWeapon() {
+            if (churu < neededChuru) {
+                alert("츄르가 부족합니다!");
+                return;
+            }
+            churu -= neededChuru;
+            document.getElementById('churu').textContent = churu;
+            
             let rand = Math.random() * 100;
             if (rand <= successRate) {
                 weaponDamage *= 2;
                 successRate = Math.max(5, successRate - 5);
+                neededChuru *= 2;
                 if (successRate <= 50) {
                     document.getElementById('failure-rate-container').style.display = 'block';
                     if (successRate > 40) {
@@ -76,6 +86,7 @@
                     weaponDamage = baseDamage;
                     successRate = 100;
                     failureRate = 0;
+                    neededChuru = 1;
                     document.getElementById('failure-rate-container').style.display = 'none';
                     alert("강화 실패! 초기 상태로 돌아갔습니다.");
                 } else {
@@ -85,6 +96,7 @@
             document.getElementById('damage').textContent = weaponDamage;
             document.getElementById('success-rate').textContent = successRate + "%";
             document.getElementById('failure-rate').textContent = failureRate + "%";
+            document.getElementById('needed-churu').textContent = neededChuru;
         }
 
         function startBattle() {
